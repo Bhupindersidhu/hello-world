@@ -1,0 +1,22 @@
+from math import sin,cos,pi
+In [29]:
+
+# Ask for the values of r and theta
+r = float(input("Enter r: "))
+d = float(input("Enter theta in degrees: "))
+Enter r: 5
+Enter theta in degrees: 77
+In [30]:
+
+# Convert the angle to radians
+theta = d*pi/180
+In [31]:
+
+# Calculate the equivalent Cartesian coordinates
+x = r*cos(theta)
+y = r*sin(theta)
+In [32]:
+
+# Print out the results
+print("x = ",x,", y = ",y)
+x =  1.1247552717193245 , y =  4.871850323926176
