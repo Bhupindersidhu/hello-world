@@ -1,0 +1,166 @@
+Jupyter Notebook
+Untitled6
+Last Checkpoint: 10/19/2019
+(autosaved)
+Current Kernel Logo
+Logout
+Python 3 Trusted
+File
+Edit
+View
+Insert
+Cell
+Kernel
+Widgets
+Help
+Run
+In [1]:
+
+import numpy as np
+import numpy.random as nr
+from sklearn.cluster import KMeans, AgglomerativeClustering
+from sklearn.metrics import silhouette_score
+import matplotlib.pyplot as plt
+In [2]:
+
+%matplotlib inline
+In [4]:
+
+def make_dist(mean, cov, dist_num, n = 100, seed = 123):
+    nr.seed(seed)
+    sample = nr.multivariate_normal(mean, cov, n) # Compute the 2-d Normally distributed data
+    sample = np.column_stack((sample, np.array([dist_num]*n))) ## Add the distribution identifier
+    print('Shape of sample = ' + str(sample.shape))
+    return(sample)
+cov = np.array([[1.0, 0.4], [0.4, 1.0]])
+mean = np.array([0.0, 0.0])
+sample1 = make_dist(mean, cov, 1)
+Shape of sample = (100, 3)
+In [5]:
+
+cov = np.array([[1.0, 0.8], [0.8, 1.0]])
+mean = np.array([3.0, 0.0])
+sample2 = make_dist(mean, cov, 2, 100, 3344)
+​
+mean = np.array([-3.0,0.0])
+cov = np.array([[1.0,0.8],[0.8,1.0]])
+sample3 = make_dist(mean, cov, 3, 100, 5566)
+Shape of sample = (100, 3)
+Shape of sample = (100, 3)
+In [6]:
+
+def plot_dat(sample1, sample2, sample3):
+    plt.scatter(sample1[:,0], sample1[:,1], color = 'blue')
+    plt.scatter(sample2[:,0], sample2[:,1], color = 'orange')
+    plt.scatter(sample3[:,0], sample3[:,1], color = 'green')
+    plt.xlabel('Dimension 1')
+    plt.ylabel('Dimension 2')
+    plt.title('Sample data')
+    plt.show()
+    
+plot_dat(sample1, sample2, sample3)  
+
+In [7]:
+
+sample = np.concatenate((sample1, sample2, sample3))
+​
+for i in range(1):
+    mean_col = np.mean(sample[:,i])
+    std_col = np.std(sample[:,i])
+    sample[:,i] = [(x - mean_col)/std_col for x in sample[:,i]]
+​
+sample.shape
+Out[7]:
+(300, 3)
+In [8]:
+
+kmeans_3 = KMeans(n_clusters=3, random_state=0)
+assignments_km3 = kmeans_3.fit_predict(sample[:,0:2])
+print(assignments_km3)
+[0 1 0 2 1 2 1 2 1 1 0 0 2 1 2 1 2 1 0 2 2 0 0 1 0 2 1 0 0 1 0 1 1 0 2 1 1
+ 2 0 2 1 1 2 2 1 1 0 0 2 1 1 0 0 1 1 0 0 1 2 1 2 0 1 1 1 2 0 1 0 1 2 1 1 0
+ 0 0 2 2 1 1 0 0 1 1 0 2 2 0 1 0 0 1 1 2 0 0 0 1 0 0 1 2 2 2 1 2 2 2 2 2 2
+ 2 2 2 2 2 2 2 2 2 2 1 2 2 2 2 2 2 2 2 2 2 2 2 2 1 2 2 2 1 2 2 2 2 2 2 2 2
+ 2 1 2 2 2 2 2 2 2 2 1 2 2 2 2 2 2 2 2 2 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+ 2 2 1 2 2 1 2 2 2 2 2 2 2 2 2 0 1 0 1 1 0 0 0 0 1 0 0 0 0 0 0 0 1 1 0 0 0
+ 0 0 0 0 0 1 0 0 0 0 0 1 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0
+ 0 0 1 0 0 0 0 1 1 0 0 0 0 1 0 0 0 0 0 1 0 0 1 1 1 0 1 0 0 1 0 0 0 1 1 1 0
+ 0 0 0 0]
+In [9]:
+
+def plot_clusters(sample, assignment):
+    col_dic = {0:'blue',1:'green',2:'orange',3:'gray',4:'magenta',5:'black'}
+    colors = [col_dic[x] for x in assignment]
+    plt.scatter(sample[:,0], sample[:,1], color = colors)
+    plt.xlabel('Dimension 1')
+    plt.ylabel('Dimension 2')
+    plt.title('Sample data')
+    plt.show()
+​
+plot_clusters(sample, assignments_km3)
+
+In [13]:
+
+''' Common scientific Python libraries '''
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.image as plm
+from scipy.cluster.hierarchy import dendrogram
+​
+''' Custom scripts '''
+import os, sys
+sys.path.append(os.path.join(os.getcwd(), "src"))
+from sklearn.cluster import KMeans, AgglomerativeClustering
+from sklearn.metrics import silhouette_score
+In [14]:
+
+# Initialize the lattice
+test_data = np.zeros(shape = (6,6), dtype='int16')
+test_data[0, range(1,3)] = 1
+test_data[1, 4] = 1
+test_data[2, 2] = 1
+test_data[5, [0,1,3,5]] = 1
+​
+# Visualize
+plt.imshow(test_data, origin='lower')
+occupied_pts = np.transpose(np.nonzero(test_data))
+plt.scatter(occupied_pts[:,1], occupied_pts[:,0])
+​
+plt.ylabel("Y"); plt.xlabel("X")
+plt.title("Sample Lattice (Yellow=Occupied)")
+plt.xticks(np.arange(-0.5,5.5,1))
+plt.yticks(np.arange(-0.5,5.5,1))
+plt.grid()
+
+In [46]:
+
+cutoff = 1.1 # Cut to dendrogram to obtain clusters at desired scale
+lattice_params = {"sizeY": 8, "sizeX": 8}
+​
+''' Perform hierarchical clustering '''
+import scipy.cluster.hierarchy as shc
+plt.figure(figsize=(6, 6))  
+plt.title("Dendrograms")  
+dend = shc.dendrogram(shc.linkage(test_data, method='single'))
+plt.axhline(y=1.5, color='r', linestyle='--')
+Out[46]:
+<matplotlib.lines.Line2D at 0xafb808b2e8>
+
+In [20]:
+
+def count_area(cluster_groups, HCStats):
+    '''
+        Sample function for calculating the 2D area of each cluster
+        Return results in *units of lattice sites*
+    '''
+    area = np.zeros( shape=(len(cluster_groups),) )     
+    
+    for ix, cluster in enumerate(cluster_groups):
+        for cid in cluster:
+            area[ix] += np.sum(HCStats[:,-1] == cid)
+    return area
+In [23]:
+
+​
+--------------------------------------------------------------------------
+
